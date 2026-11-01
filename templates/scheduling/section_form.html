@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h2>{{ title }}</h2>
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+    {% endif %}
+    {% for field in form %}
+        <div class="mb-3">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+    {% endfor %}
+    <p class="text-muted small">
+        Leave day, start time, and end time all blank to create a TBA section.
+        TBA sections cannot be added to an enrollment until a complete schedule
+        is supplied.
+    </p>
+    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+    <a class="btn btn-outline-secondary" href="{{ cancel_url }}">Cancel</a>
+</form>
+{% endblock %}

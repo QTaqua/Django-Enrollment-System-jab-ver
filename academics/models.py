@@ -150,11 +150,7 @@ class CurriculumCourse(models.Model):
 
 
 class CoursePrerequisite(models.Model):
-    """A course that must be passed before another course may be taken.
-
-    Uses a surrogate INT primary key (instead of the SQL script's composite
-    key) while preserving uniqueness of the (course, prerequisite) pair.
-    """
+    """A course that must be passed before another course may be taken."""
 
     id = models.AutoField(primary_key=True)
     course = models.ForeignKey(
@@ -223,8 +219,8 @@ class AcademicTerm(models.Model):
 class Student(models.Model):
     """Student profile linked one-to-one to an application user.
 
-    ``email`` is intentionally independent of ``User.email``; the two are not
-    synchronised automatically.
+    Personal names and contact details are stored on ``app_user``; this model
+    keeps only student-specific data.
     """
 
     id = models.AutoField(primary_key=True)
@@ -237,13 +233,6 @@ class Student(models.Model):
     curriculum = models.ForeignKey(
         Curriculum, on_delete=models.PROTECT, db_column="curriculum_id"
     )
-    first_name = models.CharField(max_length=100)
-    middle_name = models.CharField(max_length=100, null=True, blank=True)
-    last_name = models.CharField(max_length=100)
-    birth_date = models.DateField(null=True, blank=True)
-    email = models.EmailField(max_length=254)
-    phone = models.CharField(max_length=30, null=True, blank=True)
-    address = models.CharField(max_length=255, null=True, blank=True)
     year_level = models.IntegerField()
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -261,7 +250,7 @@ class Student(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.student_number} - {self.last_name}, {self.first_name}"
+        return f"{self.student_number} - {self.user.get_full_name() or self.user.username}"
 
 
 class Instructor(models.Model):
@@ -274,8 +263,6 @@ class Instructor(models.Model):
         db_column="user_id",
     )
     employee_number = models.CharField(max_length=30)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
 
     class Meta:
         db_table = "instructor"
@@ -287,4 +274,4 @@ class Instructor(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.employee_number} - {self.last_name}, {self.first_name}"
+        return f"{self.employee_number} - {self.user.get_full_name() or self.user.username}"

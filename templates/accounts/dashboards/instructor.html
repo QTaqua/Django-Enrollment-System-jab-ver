@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Instructor Dashboard{% endblock %}
+{% block content %}
+<h2>Instructor Dashboard</h2>
+<p>Welcome, {{ user.get_full_name|default:user.username }}.</p>
+<div class="alert alert-info">Access is limited to assigned sections and relevant records. Grade actions are disabled until explicitly defined. This is a minimal placeholder for Stage 1.</div>
+{% endblock %}

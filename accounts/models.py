@@ -5,10 +5,10 @@ from django.db import models
 class User(AbstractUser):
     """Application user.
 
-    Extends ``AbstractUser`` so Django's authentication, password hashing and
-    permission machinery work unchanged.  ``role`` is a coarse-grained label
-    used for authorisation decisions; fine-grained permissions still come from
-    Django's groups/permissions tables.
+    Extends ``AbstractUser`` so Django's authentication and admin work
+    unchanged.  Personal names and contact details live here so that the
+    ``student`` and ``instructor`` profiles do not duplicate them.
+    ``role`` is the coarse-grained label used for authorisation decisions.
     """
 
     class Role(models.TextChoices):
@@ -18,6 +18,9 @@ class User(AbstractUser):
         INSTRUCTOR = "INSTRUCTOR", "Instructor"
         STUDENT = "STUDENT", "Student"
 
+    middle_name = models.CharField(max_length=150, null=True, blank=True)
+    phone = models.CharField(max_length=30, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
@@ -26,6 +29,7 @@ class User(AbstractUser):
 
     class Meta:
         db_table = "app_user"
+        ordering = ["username"]
         verbose_name = "user"
         verbose_name_plural = "users"
 

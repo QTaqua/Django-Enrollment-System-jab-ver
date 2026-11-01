@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Cashier Dashboard{% endblock %}
+{% block content %}
+<h2>Cashier Dashboard</h2>
+<p>Welcome, {{ user.get_full_name|default:user.username }}.</p>
+<div class="alert alert-info">Payments, allocations, receipts, and explicitly authorized reconciliation tasks only. Assessment finalization is disabled. This is a minimal placeholder for Stage 1.</div>
+{% endblock %}
