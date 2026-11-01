@@ -1,8 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Permission Denied{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
+        <div class="text-center mb-3">
+            <img src="{% static 'img/htu-seal.png' %}" alt="" width="64" height="64" decoding="async">
+        </div>
         <div class="alert alert-danger">
             <h4 class="alert-heading">Permission Denied</h4>
             <p>You do not have permission to access this page.</p>

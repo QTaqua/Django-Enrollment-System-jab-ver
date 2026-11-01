@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Section {{ section.section_code }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 htu-page-head">
     <h2>{{ section.course.course_code }} {{ section.section_code }}</h2>
     {% if can_manage %}
         <a class="btn btn-primary" href="{% url 'scheduling:section_update' section.pk %}">Edit Section</a>
@@ -24,7 +24,7 @@
         {% endif %}
     </dd>
     <dt class="col-sm-3">Room</dt>
-    <dd class="col-sm-9">{{ section.room_code|default:"—" }}</dd>
+    <dd class="col-sm-9">{% if section.room %}{{ section.room.room_code }}{% else %}{{ section.room_code|default:"—" }}{% endif %}</dd>
     <dt class="col-sm-3">Schedule</dt>
     <dd class="col-sm-9">
         {% if section.day_of_week is not None and section.start_time and section.end_time %}
@@ -42,6 +42,7 @@
 
 <h3 class="h4 mt-4">Enrolled Students</h3>
 {% if enrolled_details %}
+<div class="table-responsive">
 <table class="table table-sm align-middle">
     <thead>
         <tr>
@@ -60,6 +61,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p class="text-muted">No students are enrolled in this section.</p>
 {% endif %}

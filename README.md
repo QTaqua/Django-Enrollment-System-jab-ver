@@ -11,6 +11,12 @@ This repository contains the simplified ADS implementation. The original,
 larger data model has been replaced, but the repository's Git history is
 preserved.
 
+The user interface is branded for **Holy Trinity University** in Puerto Princesa
+City, Palawan, as **Holy Trinity University · Enrollment System**. The repository
+and course-project name remain *ADS Enrollment System*. Branding is limited to
+documentation, static assets, and presentation; application behaviour is
+unchanged. See `docs/brand/htu-brand-reference.md` and `docs/brand/NOTICE.md`.
+
 ## Technology stack
 
 | Component | Version |
@@ -152,6 +158,8 @@ UI exists.
 ├── enrollment/              # enrollments, details, prerequisites, student portal
 ├── finance/                 # assessments, payments, and finance service helpers
 ├── templates/               # shared Bootstrap UI and role dashboards
+├── static/                  # HTU theme stylesheet, official seal and favicons
+├── docs/brand/              # brand reference and institutional-marks notice
 └── erd_artifacts/           # simplified schema and ERD reference artifacts
 ```
 
@@ -340,6 +348,23 @@ The files under `erd_artifacts/` are design and documentation artifacts only:
 
 Do not execute the SQL script as a substitute for Django migrations. It does not
 record migration state. Use `python manage.py migrate` for a fresh database.
+
+## Institutional branding
+
+The interface uses the official Holy Trinity University seal and site icons,
+copied unmodified from <https://www.htu.edu.ph/> on 2026-11-01. Asset hashes and
+sampled colours are recorded in `docs/brand/htu-brand-reference.md`.
+
+- Typeface: Poppins (Google Fonts), with system fallbacks.
+- Primary green `#2F5B2B`; accent gold `#FFBE00`; surfaces `#F3F5F8` / `#F9FAFD`;
+  borders `#C8D5DC`; text `#1F2328`.
+- Stylesheet: `static/css/htu-theme.css`.
+- The Bootstrap 5.3.3 CDN link, navigation conditions, form fields, button text,
+  and all business rules are unchanged.
+
+This is an independently developed academic demonstration. It is not an official
+HTU publication or university-operated service, and no endorsement is implied.
+See `docs/brand/NOTICE.md`.
 
 ## Current limitations
 

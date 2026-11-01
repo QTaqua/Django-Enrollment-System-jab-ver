@@ -3,6 +3,7 @@
 {% block content %}
 <h2>My Enrollments</h2>
 {% if enrollments %}
+<div class="table-responsive">
 <table class="table table-striped align-middle">
     <thead>
         <tr>
@@ -33,6 +34,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p class="text-muted">You have no enrollments yet.</p>
 {% endif %}

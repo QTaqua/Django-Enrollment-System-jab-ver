@@ -1,37 +1,52 @@
 {% extends "base.html" %}
-{% block title %}Login - ADS Enrollment System{% endblock %}
+{% load static %}
+{% block body_class %}htu-login{% endblock %}
+{% block title %}Login{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card">
-            <div class="card-header">Login</div>
-            <div class="card-body">
-                {% if form.errors %}
-                    <div class="alert alert-danger">Invalid username or password.</div>
-                {% endif %}
-                {% for error in form.non_field_errors %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                {% if next %}
-                    {% if user.is_authenticated %}
-                        <div class="alert alert-warning">Your account does not have access to this page.</div>
-                    {% endif %}
-                {% endif %}
-                <form method="post" action="{% url 'login' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ next }}">
-                    <div class="mb-3">
-                        <label for="id_username" class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control" id="id_username" required autofocus>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_password" class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" id="id_password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
+<div class="htu-auth">
+    <aside class="htu-auth__brand">
+        <div class="htu-auth__identity">
+            <img class="htu-auth__seal" src="{% static 'img/htu-seal.png' %}" alt="Holy Trinity University seal" width="108" height="108" decoding="async">
+            <div class="htu-auth__lockup">
+                <p class="htu-auth__eyebrow">Holy Trinity University</p>
+                <p class="htu-auth__system">Enrollment System</p>
+                <p class="htu-auth__values">Passion for Truth. Compassion for Humanity.</p>
             </div>
         </div>
-    </div>
+        <div class="htu-auth__meta">
+            <p>The first dynamic center of Catholic Education in Palawan.</p>
+            <p>Puerto Princesa City, Palawan, Philippines</p>
+        </div>
+    </aside>
+    <section class="htu-auth__panel" aria-labelledby="login-heading">
+        <div class="htu-auth__inner">
+            <h1 class="htu-auth__title" id="login-heading">Login</h1>
+            <p class="htu-auth__hint">Sign in to continue to your dashboard.</p>
+            {% if form.errors %}
+                <div class="alert alert-danger">Invalid username or password.</div>
+            {% endif %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            {% if next %}
+                {% if user.is_authenticated %}
+                    <div class="alert alert-warning">Your account does not have access to this page.</div>
+                {% endif %}
+            {% endif %}
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <div class="mb-3">
+                    <label for="id_username" class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" id="id_username" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label for="id_password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" id="id_password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+    </section>
 </div>
 {% endblock %}

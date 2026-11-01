@@ -100,6 +100,38 @@ class RegistrarReadOnlyMixin(RoleRequiredMixin):
     allowed_roles = (User.Role.REGISTRAR, User.Role.ADMINISTRATOR)
 
 
+class CashierRequiredMixin(RoleRequiredMixin):
+    """Cashier-only finance operations (recording payments, receipts)."""
+
+    allowed_roles = (User.Role.CASHIER,)
+
+
+class FinanceReadMixin(RoleRequiredMixin):
+    """Read access to finance screens for Cashier, Registrar, and Administrator.
+
+    Students and instructors are never granted finance access here.
+    """
+
+    allowed_roles = (
+        User.Role.CASHIER,
+        User.Role.REGISTRAR,
+        User.Role.ADMINISTRATOR,
+    )
+
+
+class AssessmentManageMixin(RoleRequiredMixin):
+    """Finalize/revise assessments: Registrar and Administrator only."""
+
+    allowed_roles = (User.Role.REGISTRAR, User.Role.ADMINISTRATOR)
+
+
+class FinanceApproverMixin(RoleRequiredMixin):
+    """Administrator-only financial approval: adjustments, scholarships,
+    reversals, fee rules, policy, and reconciliation."""
+
+    allowed_roles = (User.Role.ADMINISTRATOR,)
+
+
 def get_student_for_user(user):
     """Return the Student instance for the active authenticated user, or None."""
     if not user or not user.is_authenticated or not user.is_active:

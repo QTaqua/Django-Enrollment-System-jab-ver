@@ -137,6 +137,9 @@ MESSAGE_TAGS = {
 
 STATIC_URL = "static/"
 
+# Project-level static assets (brand theme, official HTU seal and favicons).
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
 # INT primary keys everywhere, per project requirements.
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 

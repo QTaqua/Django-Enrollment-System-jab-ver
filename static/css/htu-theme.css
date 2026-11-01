@@ -1,0 +1,830 @@
+/* ==========================================================================
+   Holy Trinity University · Enrollment System
+   Branding layer only. No template behaviour, routes, or business rules.
+   Institutional marks belong to Holy Trinity University.
+   See docs/brand/NOTICE.md.
+   ========================================================================== */
+
+:root {
+    --htu-green: #43783A;
+    --htu-green-deep: #2F5B2B;
+    --htu-green-darker: #24471F;
+    --htu-gold: #FFBE00;
+    --htu-gold-soft: #FFF6CC;
+    --htu-seal-gold: #F8D30C;
+    --htu-red: #A81F23;
+    --htu-navy: #324A6D;
+    --htu-surface: #F3F5F8;
+    --htu-paper: #F9FAFD;
+    --htu-mist: #C8D5DC;
+    --htu-ink: #1F2328;
+    --htu-muted: #5B6670;
+    --htu-white: #FFFFFF;
+    --htu-radius: 12px;
+    --htu-shadow: 0 1px 2px rgba(31, 35, 40, .06), 0 10px 28px rgba(31, 35, 40, .05);
+    --htu-font: "Poppins", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--htu-font);
+    background-color: var(--htu-surface);
+    color: var(--htu-ink);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   Skip link
+   -------------------------------------------------------------------------- */
+
+.htu-skip-link {
+    position: absolute;
+    top: -4rem;
+    left: 1rem;
+    z-index: 1080;
+    padding: .6rem 1rem;
+    background: var(--htu-white);
+    color: var(--htu-green-deep);
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid var(--htu-green-deep);
+    border-radius: 0 0 8px 8px;
+    transition: top .15s ease-in-out;
+}
+
+.htu-skip-link:focus {
+    top: 0;
+    color: var(--htu-green-deep);
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+
+.htu-header {
+    background: var(--htu-green-deep);
+    border-bottom: 3px solid var(--htu-gold);
+    box-shadow: 0 2px 10px rgba(31, 35, 40, .16);
+}
+
+.htu-header .navbar {
+    padding: .45rem 0;
+}
+
+.htu-header .container,
+.htu-footer .container,
+main.htu-main {
+    max-width: 1180px;
+}
+
+.htu-brand {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .2rem 0;
+    color: var(--htu-white);
+    text-decoration: none;
+}
+
+.htu-brand:hover,
+.htu-brand:focus {
+    color: var(--htu-white);
+    text-decoration: none;
+}
+
+.htu-brand__seal {
+    width: 46px;
+    height: auto;
+    flex: 0 0 auto;
+}
+
+.htu-brand__name {
+    display: block;
+    font-size: 1.02rem;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: .005em;
+}
+
+.htu-brand__system {
+    display: block;
+    margin-top: .18rem;
+    color: var(--htu-gold);
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+}
+
+.htu-header .navbar-nav {
+    gap: .1rem;
+}
+
+.htu-header .nav-link {
+    color: rgba(255, 255, 255, .86);
+    font-size: .92rem;
+    font-weight: 500;
+    padding: .5rem .7rem;
+    border-radius: 7px;
+}
+
+.htu-header .nav-link:hover,
+.htu-header .nav-link:focus {
+    color: var(--htu-white);
+    background-color: rgba(255, 255, 255, .12);
+}
+
+.htu-header .navbar-text {
+    color: rgba(255, 255, 255, .72);
+    font-size: .82rem;
+}
+
+.htu-header .htu-user {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+.htu-header .htu-logout {
+    color: var(--htu-gold);
+    text-decoration: none;
+    font-size: .9rem;
+    font-weight: 500;
+    padding: .35rem .55rem;
+}
+
+.htu-header .htu-logout:hover,
+.htu-header .htu-logout:focus {
+    color: var(--htu-white);
+    background-color: rgba(255, 255, 255, .12);
+}
+
+.htu-header .navbar-toggler {
+    border-color: rgba(255, 255, 255, .4);
+    padding: .35rem .55rem;
+}
+
+.htu-header .navbar-toggler:focus {
+    box-shadow: 0 0 0 3px rgba(255, 190, 0, .45);
+}
+
+@media (max-width: 991.98px) {
+    .htu-header .navbar-collapse {
+        padding: .5rem 0 .75rem;
+    }
+
+    .htu-header .navbar-nav {
+        gap: .15rem;
+    }
+
+    .htu-header .navbar-text {
+        margin-top: .5rem;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Main surface
+   -------------------------------------------------------------------------- */
+
+main.htu-main {
+    flex: 1 0 auto;
+    margin-top: 1.75rem;
+    margin-bottom: 2.5rem;
+    padding: clamp(1.25rem, 1rem + 1.4vw, 2.25rem);
+    background: var(--htu-white);
+    border: 1px solid var(--htu-mist);
+    border-radius: var(--htu-radius);
+    box-shadow: var(--htu-shadow);
+}
+
+/* Login page: the auth card fills the surface. */
+.htu-login main.htu-main {
+    padding: 0;
+    overflow: hidden;
+}
+
+main.htu-main h2 {
+    margin-bottom: .4rem;
+    color: var(--htu-ink);
+    font-size: clamp(1.45rem, 1.2rem + .9vw, 1.85rem);
+    font-weight: 600;
+    letter-spacing: -.015em;
+    line-height: 1.25;
+}
+
+main.htu-main h2::after {
+    content: "";
+    display: block;
+    width: 52px;
+    height: 3px;
+    margin-top: .55rem;
+    background: var(--htu-gold);
+    border-radius: 999px;
+}
+
+main.htu-main h3,
+main.htu-main .h4 {
+    margin-top: 1.9rem;
+    margin-bottom: .75rem;
+    color: var(--htu-navy);
+    font-size: 1.12rem;
+    font-weight: 600;
+}
+
+main.htu-main h4 {
+    color: var(--htu-navy);
+    font-weight: 600;
+}
+
+.htu-page-head {
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+
+.htu-actions {
+    flex-wrap: wrap;
+    gap: .6rem;
+}
+
+/* --------------------------------------------------------------------------
+   Links and focus
+   -------------------------------------------------------------------------- */
+
+main.htu-main a:not(.btn) {
+    color: var(--htu-green-deep);
+    text-underline-offset: 2px;
+}
+
+main.htu-main a:not(.btn):hover {
+    color: var(--htu-green-darker);
+}
+
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+.nav-link:focus-visible,
+.navbar-toggler:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--htu-gold);
+    outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: .5rem 1rem;
+}
+
+.btn-sm {
+    padding: .3rem .6rem;
+    border-radius: 6px;
+    font-size: .82rem;
+}
+
+.btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--htu-green-deep);
+    --bs-btn-border-color: var(--htu-green-deep);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--htu-green-darker);
+    --bs-btn-hover-border-color: var(--htu-green-darker);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--htu-green-darker);
+    --bs-btn-active-border-color: var(--htu-green-darker);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #6E8B67;
+    --bs-btn-disabled-border-color: #6E8B67;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--htu-green-deep);
+    --bs-btn-border-color: #9DBB95;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--htu-green-deep);
+    --bs-btn-hover-border-color: var(--htu-green-deep);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--htu-green-darker);
+    --bs-btn-active-border-color: var(--htu-green-darker);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: #46525C;
+    --bs-btn-border-color: var(--htu-mist);
+    --bs-btn-hover-color: var(--htu-ink);
+    --bs-btn-hover-bg: #E9EEF2;
+    --bs-btn-hover-border-color: #B6C5D0;
+    --bs-btn-active-color: var(--htu-ink);
+    --bs-btn-active-bg: #DDE5EB;
+    --bs-btn-active-border-color: #B6C5D0;
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--htu-red);
+    --bs-btn-border-color: #D9A3A5;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--htu-red);
+    --bs-btn-hover-border-color: var(--htu-red);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #8C1A1D;
+    --bs-btn-active-border-color: #8C1A1D;
+}
+
+.btn-success {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--htu-green);
+    --bs-btn-border-color: var(--htu-green);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--htu-green-deep);
+    --bs-btn-hover-border-color: var(--htu-green-deep);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--htu-green-darker);
+    --bs-btn-active-border-color: var(--htu-green-darker);
+}
+
+/* --------------------------------------------------------------------------
+   Tables
+   -------------------------------------------------------------------------- */
+
+main.htu-main .table {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: #FAFBFD;
+    --bs-table-border-color: #E4EAF0;
+    margin-bottom: 0;
+    color: var(--htu-ink);
+    font-size: .92rem;
+    vertical-align: middle;
+}
+
+main.htu-main .table > :not(caption) > * > * {
+    padding: .7rem .75rem;
+}
+
+main.htu-main .table thead th {
+    background-color: var(--htu-paper);
+    border-bottom: 1px solid var(--htu-mist);
+    color: var(--htu-navy);
+    font-size: .71rem;
+    font-weight: 600;
+    letter-spacing: .085em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+main.htu-main .table tbody tr:last-child > * {
+    border-bottom: 0;
+}
+
+main.htu-main .table tbody tr:hover > * {
+    background-color: #F4F7FA;
+}
+
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+    background: var(--htu-white);
+    border: 1px solid var(--htu-mist);
+    border-radius: 10px;
+}
+
+.table-responsive > .table {
+    border-radius: 10px;
+}
+
+/* Course/status chips */
+main.htu-main .badge {
+    font-weight: 600;
+    letter-spacing: .01em;
+}
+
+main.htu-main .badge.text-bg-secondary {
+    background-color: #E8F1E6 !important;
+    border: 1px solid #CDE0C9;
+    color: var(--htu-green-deep) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Forms
+   -------------------------------------------------------------------------- */
+
+main.htu-main > form {
+    max-width: 760px;
+}
+
+.form-label {
+    margin-bottom: .35rem;
+    color: var(--htu-ink);
+    font-size: .9rem;
+    font-weight: 500;
+}
+
+.form-control,
+.form-select {
+    border-color: var(--htu-mist);
+    border-radius: 8px;
+    padding: .55rem .75rem;
+    color: var(--htu-ink);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--htu-green);
+    box-shadow: 0 0 0 .2rem rgba(67, 120, 58, .18);
+}
+
+.form-check-input:checked {
+    background-color: var(--htu-green-deep);
+    border-color: var(--htu-green-deep);
+}
+
+.form-text {
+    color: var(--htu-muted);
+}
+
+.htu-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: 1.25rem;
+}
+
+main.htu-main dl.row {
+    margin-bottom: 1.5rem;
+}
+
+main.htu-main dl.row dt {
+    color: var(--htu-navy);
+    font-size: .86rem;
+    font-weight: 600;
+}
+
+main.htu-main dl.row dd {
+    margin-bottom: .85rem;
+}
+
+/* --------------------------------------------------------------------------
+   Alerts and messages
+   -------------------------------------------------------------------------- */
+
+.alert {
+    border-width: 1px;
+    border-left-width: 4px;
+    border-radius: 10px;
+    font-size: .92rem;
+}
+
+.alert h4,
+.alert .alert-heading {
+    color: inherit;
+}
+
+.alert-info {
+    --bs-alert-color: #1D3B52;
+    --bs-alert-bg: #EEF5FB;
+    --bs-alert-border-color: #CFE2F0;
+}
+
+.alert-danger {
+    --bs-alert-color: #6E1518;
+    --bs-alert-bg: #FBEDED;
+    --bs-alert-border-color: #E7BFC0;
+}
+
+.alert-warning {
+    --bs-alert-color: #5C4300;
+    --bs-alert-bg: #FFF7E3;
+    --bs-alert-border-color: #EFD79A;
+}
+
+.alert-success {
+    --bs-alert-color: #1F4523;
+    --bs-alert-bg: #EDF7EE;
+    --bs-alert-border-color: #BFDCC2;
+}
+
+/* --------------------------------------------------------------------------
+   Cards used by existing templates
+   -------------------------------------------------------------------------- */
+
+main.htu-main .card {
+    border: 1px solid var(--htu-mist);
+    border-radius: 10px;
+}
+
+main.htu-main .card-header {
+    background: var(--htu-paper);
+    border-bottom: 1px solid var(--htu-mist);
+    color: var(--htu-navy);
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Login / authentication
+   -------------------------------------------------------------------------- */
+
+.htu-auth {
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    min-height: 540px;
+}
+
+.htu-auth__brand {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: clamp(1.75rem, 3vw, 3rem);
+    background: linear-gradient(155deg, var(--htu-green-deep) 0%, #39682F 62%, var(--htu-green) 100%);
+    color: var(--htu-white);
+}
+
+.htu-auth__identity {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.htu-auth__seal {
+    width: 108px;
+    height: auto;
+    margin-bottom: 1.5rem;
+}
+
+.htu-auth__eyebrow {
+    margin: 0 0 .45rem;
+    color: var(--htu-gold);
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+
+.htu-auth__system {
+    margin: 0 0 1rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.htu-auth__values {
+    margin: 0;
+    max-width: 34ch;
+    color: rgba(255, 255, 255, .86);
+    font-size: .95rem;
+}
+
+.htu-auth__meta p {
+    margin: 0 0 .35rem;
+    color: rgba(255, 255, 255, .72);
+    font-size: .8rem;
+}
+
+.htu-auth__meta p:first-child {
+    color: var(--htu-gold);
+}
+
+.htu-auth__panel {
+    display: flex;
+    align-items: center;
+    padding: clamp(1.75rem, 4vw, 3.25rem);
+    background: var(--htu-white);
+}
+
+.htu-auth__inner {
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+}
+
+.htu-auth__title {
+    margin: 0 0 .35rem;
+    color: var(--htu-ink);
+    font-size: 1.9rem;
+    font-weight: 600;
+    letter-spacing: -.015em;
+}
+
+.htu-auth__title::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin-top: .6rem;
+    background: var(--htu-gold);
+    border-radius: 999px;
+}
+
+.htu-auth__hint {
+    margin: 0 0 1.5rem;
+    color: var(--htu-muted);
+    font-size: .9rem;
+}
+
+.htu-auth__inner .alert {
+    margin-top: 1rem;
+}
+
+.htu-auth__inner .btn-primary {
+    width: 100%;
+    margin-top: .35rem;
+}
+
+@media (max-width: 899.98px) {
+    .htu-auth {
+        grid-template-columns: 1fr;
+        min-height: 0;
+    }
+
+    .htu-auth__brand {
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.15rem 1.35rem;
+    }
+
+    .htu-auth__identity {
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .htu-auth__seal {
+        width: 52px;
+        margin-bottom: 0;
+    }
+
+    .htu-auth__eyebrow {
+        margin-bottom: .1rem;
+        font-size: .6rem;
+        letter-spacing: .12em;
+    }
+
+    .htu-auth__system {
+        margin-bottom: 0;
+        font-size: 1rem;
+    }
+
+    .htu-auth__values,
+    .htu-auth__meta {
+        display: none;
+    }
+
+    .htu-auth__panel {
+        padding: 1.75rem 1.35rem 2rem;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.htu-footer {
+    margin-top: auto;
+    padding: 2rem 0 1.75rem;
+    background: var(--htu-green-deep);
+    border-top: 3px solid var(--htu-gold);
+    color: rgba(255, 255, 255, .82);
+    font-size: .85rem;
+}
+
+.htu-footer__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    gap: 1.5rem 2.5rem;
+    align-items: start;
+}
+
+.htu-footer__brand {
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+}
+
+.htu-footer__seal {
+    width: 42px;
+    height: auto;
+    flex: 0 0 auto;
+}
+
+.htu-footer__name {
+    margin: 0 0 .25rem;
+    color: var(--htu-white);
+    font-size: .95rem;
+    font-weight: 600;
+}
+
+.htu-footer__tagline {
+    margin: 0;
+    color: var(--htu-gold);
+    font-size: .82rem;
+}
+
+.htu-footer__meta p {
+    margin: 0 0 .35rem;
+}
+
+.htu-footer a {
+    color: var(--htu-gold);
+    text-decoration: none;
+}
+
+.htu-footer a:hover,
+.htu-footer a:focus {
+    color: var(--htu-white);
+    text-decoration: underline;
+}
+
+.htu-footer__note {
+    color: rgba(255, 255, 255, .6);
+    font-size: .78rem;
+}
+
+@media (max-width: 767.98px) {
+    .htu-footer__inner {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Motion preferences
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Print — existing pages only; hides chrome, keeps content.
+   -------------------------------------------------------------------------- */
+
+@media print {
+    .htu-header,
+    .htu-footer,
+    .htu-skip-link {
+        display: none !important;
+    }
+
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    main.htu-main {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    main.htu-main h2::after {
+        background: #000;
+    }
+
+    main.htu-main a:not(.btn) {
+        color: #000;
+        text-decoration: underline;
+    }
+
+    main.htu-main .table {
+        font-size: 10pt;
+    }
+
+    .alert {
+        background: #fff !important;
+        border: 1px solid #999 !important;
+        color: #000 !important;
+    }
+
+    .badge {
+        background: #fff !important;
+        border: 1px solid #666 !important;
+        color: #000 !important;
+    }
+
+    @page {
+        margin: 16mm;
+    }
+}

@@ -1,63 +1,94 @@
-<!doctype html>
+{% load static %}<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}ADS Enrollment System{% endblock %}</title>
+    <meta name="description" content="Enrollment System for Holy Trinity University, Puerto Princesa City, Palawan, Philippines.">
+    <title>{% block title %}Enrollment System{% endblock %} | Holy Trinity University</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'img/favicon-192x192.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon-180x180.png' %}">
+    <meta name="theme-color" content="#2F5B2B">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/htu-theme.css' %}" rel="stylesheet">
     {% block extra_head %}{% endblock %}
 </head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'dashboard' %}">ADS Enrollment System</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-                </li>
-                {% if user.role == 'REGISTRAR' or user.role == 'ADMINISTRATOR' %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'academics:college_list' %}">Academics</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'scheduling:section_list' %}">Sections</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'enrollment:enrollment_list' %}">Enrollments</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'people:student_list' %}">People</a>
-                </li>
-                {% endif %}
-                {% if user.role == 'STUDENT' %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'enrollment:my_enrollment_list' %}">My Enrollments</a>
-                </li>
-                {% endif %}
-                <li class="nav-item">
-                    <span class="navbar-text me-2">{{ user.username }} ({{ user.get_role_display }})</span>
-                </li>
-                <li class="nav-item">
-                    <form method="post" action="{% url 'logout' %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link nav-link">Logout</button>
-                    </form>
-                </li>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Login</a>
-                </li>
-                {% endif %}
-            </ul>
+<body class="{% block body_class %}{% endblock %}">
+<a class="htu-skip-link" href="#main-content">Skip to main content</a>
+<header class="htu-header">
+    <nav class="navbar navbar-expand-lg navbar-dark" aria-label="Primary navigation">
+        <div class="container htu-header__inner">
+            <a class="navbar-brand htu-brand" href="{% url 'dashboard' %}">
+                <img class="htu-brand__seal" src="{% static 'img/htu-seal.png' %}" alt="" width="46" height="46" decoding="async">
+                <span class="htu-brand__text">
+                    <span class="htu-brand__name">Holy Trinity University</span>
+                    <span class="htu-brand__system">Enrollment System</span>
+                </span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#htuPrimaryNav" aria-controls="htuPrimaryNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="htuPrimaryNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    {% if user.role == 'REGISTRAR' or user.role == 'ADMINISTRATOR' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'academics:college_list' %}">Academics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'scheduling:section_list' %}">Sections</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'enrollment:enrollment_list' %}">Enrollments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'people:student_list' %}">People</a>
+                    </li>
+                    {% endif %}
+                    {% if user.role == 'STUDENT' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'enrollment:my_enrollment_list' %}">My Enrollments</a>
+                    </li>
+                    {% endif %}
+                    {% if user.role == 'CASHIER' or user.role == 'REGISTRAR' or user.role == 'ADMINISTRATOR' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'finance:assessment_list' %}">Finance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'reports:index' %}">Reports</a>
+                    </li>
+                    {% endif %}
+                    {% if user.role == 'ADMINISTRATOR' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'finance:approvals' %}">Approvals</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <span class="navbar-text htu-user me-2">{{ user.username }} ({{ user.get_role_display }})</span>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link nav-link htu-logout">Logout</button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
-<main class="container">
+    </nav>
+</header>
+<main id="main-content" class="container htu-main" tabindex="-1">
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
@@ -65,6 +96,24 @@
     {% endif %}
     {% block content %}{% endblock %}
 </main>
+<footer class="htu-footer">
+    <div class="container">
+        <div class="htu-footer__inner">
+            <div class="htu-footer__brand">
+                <img class="htu-footer__seal" src="{% static 'img/htu-seal.png' %}" alt="" width="42" height="42" loading="lazy" decoding="async">
+                <div>
+                    <p class="htu-footer__name">Holy Trinity University</p>
+                    <p class="htu-footer__tagline">The first dynamic center of Catholic Education in Palawan.</p>
+                </div>
+            </div>
+            <div class="htu-footer__meta">
+                <p>Quezon Street, Brgy. Maligaya, Puerto Princesa City, Palawan, Philippines</p>
+                <p><a href="https://www.htu.edu.ph/" rel="noopener">www.htu.edu.ph</a> &middot; htu.palawan@htu.edu.ph &middot; (048) 433 2161</p>
+                <p class="htu-footer__note">Academic demonstration project. Not an official Holy Trinity University service.</p>
+            </div>
+        </div>
+    </div>
+</footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 {% block extra_js %}{% endblock %}
 </body>

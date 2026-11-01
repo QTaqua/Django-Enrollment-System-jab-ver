@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="htu-report-head">
+    <h2>{{ title }}</h2>
+    <p class="text-muted mb-1">Holy Trinity University · Enrollment System — generated {{ generated_at|date:"Y-m-d H:i" }}</p>
+</div>
+<div class="alert alert-secondary d-print-none">
+    <strong>Counting method:</strong> <em>Distinct students</em> counts each student once per term;
+    <em>active enrollment records</em> counts non-cancelled enrollment rows. Cancelled enrollments are excluded.
+</div>
+
+<form method="get" class="row g-2 mb-3 d-print-none">
+    <div class="col-auto">
+        <select name="academic_year" class="form-select">
+            <option value="">All years</option>
+            {% for y in years %}<option value="{{ y }}" {% if filters.academic_year == y %}selected{% endif %}>{{ y }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <select name="semester" class="form-select">
+            <option value="">All semesters</option>
+            {% for s in "12" %}<option value="{{ s }}" {% if filters.semester == s|stringformat:'s' %}selected{% endif %}>Semester {{ s }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-auto"><button class="btn btn-primary" type="submit">Filter</button></div>
+    <div class="col-auto"><a class="btn btn-outline-secondary" href="{{ csv_url }}">Export CSV</a></div>
+    <div class="col-auto"><button type="button" class="btn btn-outline-secondary" onclick="window.print()">Print / Save as PDF</button></div>
+</form>
+
+{% if rows %}
+{% for r in rows %}
+<div class="mb-4">
+    <h3 class="h5">{{ r.academic_year }} — Semester {{ r.semester }}</h3>
+    <p class="mb-2">Distinct students: <strong>{{ r.distinct_students }}</strong>
+        · Active enrollment records: <strong>{{ r.records }}</strong></p>
+    {% if r.breakdown %}
+    <div class="table-responsive">
+    <table class="table table-sm align-middle" style="max-width: 720px;">
+        <thead><tr><th>College</th><th>Program</th><th class="text-end">Students</th><th class="text-end">Enrollments</th></tr></thead>
+        <tbody>
+        {% for b in r.breakdown %}
+            <tr>
+                <td>{{ b.student__curriculum__program__college__name }}</td>
+                <td>{{ b.student__curriculum__program__program_code }}</td>
+                <td class="text-end">{{ b.students }}</td>
+                <td class="text-end">{{ b.enrollments }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+{% else %}
+<p class="text-muted">No terms match the selected filters.</p>
+{% endif %}
+{% endblock %}

@@ -15,8 +15,20 @@ from academics.models import (
     Student,
 )
 from enrollment.models import Enrollment, EnrollmentDetail
-from finance.models import Assessment, Payment
-from scheduling.models import Section
+from finance.models import (
+    Adjustment,
+    Assessment,
+    AssessmentLine,
+    AssessmentVersion,
+    FeeRule,
+    FinanceAuditLog,
+    FinancePolicy,
+    Payment,
+    PaymentAllocation,
+    Reconciliation,
+    ScholarshipAward,
+)
+from scheduling.models import Room, Section
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -214,6 +226,49 @@ class AcademicTermAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+
+@admin.register(Room, site=ads_admin_site)
+class RoomAdmin(admin.ModelAdmin):
+    list_display = ("room_code", "name", "building", "capacity", "is_active")
+    search_fields = ("room_code", "name", "building")
+    list_filter = ("is_active",)
+    actions = []
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(FeeRule, site=ads_admin_site)
+class FeeRuleAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "scope", "computation", "amount",
+                    "course", "program", "is_active", "is_demo")
+    list_filter = ("category", "scope", "computation", "is_active", "is_demo")
+    search_fields = ("name",)
+    actions = []
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(FinancePolicy, site=ads_admin_site)
+class FinancePolicyAdmin(admin.ModelAdmin):
+    list_display = ("previous_term_balance", "overpayment_becomes_credit",
+                    "credit_application_requires_approval",
+                    "refund_requires_approval", "updated_at")
+    actions = []
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+# Read-only finance ledger / audit models (managed through finance services/views)
+ads_admin_site.register(AssessmentVersion, ReadOnlyAdmin)
+ads_admin_site.register(AssessmentLine, ReadOnlyAdmin)
+ads_admin_site.register(PaymentAllocation, ReadOnlyAdmin)
+ads_admin_site.register(Adjustment, ReadOnlyAdmin)
+ads_admin_site.register(ScholarshipAward, ReadOnlyAdmin)
+ads_admin_site.register(Reconciliation, ReadOnlyAdmin)
+ads_admin_site.register(FinanceAuditLog, ReadOnlyAdmin)
 
 # Read-only models
 ads_admin_site.register(Student, ReadOnlyAdmin)

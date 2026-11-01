@@ -2,13 +2,14 @@
 {% load display_tags %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 htu-page-head">
     <h2>{{ title }}</h2>
     {% if can_create and create_url_name %}
         <a class="btn btn-primary" href="{% url create_url_name %}">Add {{ entity_name }}</a>
     {% endif %}
 </div>
 {% if objects %}
+<div class="table-responsive">
 <table class="table table-striped align-middle">
     <thead>
         <tr>
@@ -29,6 +30,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p class="text-muted">No records found.</p>
 {% endif %}

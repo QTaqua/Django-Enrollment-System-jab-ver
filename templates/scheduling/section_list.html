@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Sections{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 htu-page-head">
     <h2>Sections</h2>
     {% if can_manage %}
         <a class="btn btn-primary" href="{% url 'scheduling:section_create' %}">Add Section</a>
     {% endif %}
 </div>
 {% if sections %}
+<div class="table-responsive">
 <table class="table table-striped align-middle">
     <thead>
         <tr>
@@ -62,6 +63,7 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% else %}
 <p class="text-muted">No sections found.</p>
 {% endif %}

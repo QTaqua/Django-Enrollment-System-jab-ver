@@ -4,7 +4,7 @@
 <h2>Administrator Dashboard</h2>
 <p>Welcome, {{ user.get_full_name|default:user.username }}.</p>
 <div class="alert alert-info">Full application access subject to business rules, validation, payment restrictions, and audit-history protections. This is a minimal placeholder for Stage 1.</div>
-<div class="d-flex gap-2">
+<div class="d-flex gap-2 htu-actions">
     <a class="btn btn-outline-primary" href="{% url 'academics:college_list' %}">View Academic Data</a>
     <a class="btn btn-outline-primary" href="{% url 'scheduling:section_list' %}">View Sections</a>
     <a class="btn btn-outline-primary" href="{% url 'enrollment:enrollment_list' %}">View Enrollments</a>

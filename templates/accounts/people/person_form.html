@@ -24,7 +24,9 @@
             {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
         </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a class="btn btn-outline-secondary" href="{{ cancel_url }}">Cancel</a>
+    <div class="htu-form-actions">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a class="btn btn-outline-secondary" href="{{ cancel_url }}">Cancel</a>
+    </div>
 </form>
 {% endblock %}

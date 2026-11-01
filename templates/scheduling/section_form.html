@@ -22,7 +22,9 @@
         TBA sections cannot be added to an enrollment until a complete schedule
         is supplied.
     </p>
-    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
-    <a class="btn btn-outline-secondary" href="{{ cancel_url }}">Cancel</a>
+    <div class="htu-form-actions">
+        <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+        <a class="btn btn-outline-secondary" href="{{ cancel_url }}">Cancel</a>
+    </div>
 </form>
 {% endblock %}

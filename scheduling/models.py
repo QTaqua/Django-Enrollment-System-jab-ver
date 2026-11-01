@@ -1,6 +1,40 @@
 from django.db import models
 
 
+class Room(models.Model):
+    """A normalized physical room used for section scheduling.
+
+    ``room_code`` is the unique identifier (e.g. ``LAB-A``). ``Section`` keeps a
+    legacy free-text ``room_code`` for display/compatibility, but the ``room``
+    foreign key is authoritative for room double-booking checks.
+    """
+
+    id = models.AutoField(primary_key=True)
+    room_code = models.CharField(max_length=30)
+    name = models.CharField(max_length=150)
+    building = models.CharField(max_length=100, null=True, blank=True)
+    capacity = models.IntegerField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "room"
+        ordering = ["room_code"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["room_code"], name="uq_room_room_code"
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(capacity__isnull=True) | models.Q(capacity__gte=1)
+                ),
+                name="ck_room_capacity_positive",
+            ),
+        ]
+
+    def __str__(self):
+        return self.room_code
+
+
 class Section(models.Model):
     """An offering of a course in a term, taught by one instructor.
 
@@ -39,6 +73,13 @@ class Section(models.Model):
     )
     section_code = models.CharField(max_length=20)
     capacity = models.IntegerField()
+    room = models.ForeignKey(
+        "scheduling.Room",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        db_column="room_id",
+    )
     room_code = models.CharField(max_length=30, blank=True)
     day_of_week = models.IntegerField(
         choices=DayOfWeek.choices, null=True, blank=True

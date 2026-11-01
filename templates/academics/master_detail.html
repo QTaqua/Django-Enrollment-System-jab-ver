@@ -9,7 +9,7 @@
         <dd class="col-sm-9">{{ object|display:field }}</dd>
     {% endfor %}
 </dl>
-<div class="d-flex gap-2">
+<div class="d-flex gap-2 htu-actions">
     {% if can_edit and update_url_name %}
         <a class="btn btn-primary" href="{% url update_url_name object.pk %}">Edit</a>
     {% endif %}

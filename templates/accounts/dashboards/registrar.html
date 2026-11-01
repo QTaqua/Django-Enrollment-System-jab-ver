@@ -4,7 +4,7 @@
 <h2>Registrar Dashboard</h2>
 <p>Welcome, {{ user.get_full_name|default:user.username }}.</p>
 <div class="alert alert-info">Academics/enrollment oversight. Assessments may be finalized via the approved service. Enrollment overrides are disabled until explicitly defined. This is a minimal placeholder for Stage 1.</div>
-<div class="d-flex gap-2">
+<div class="d-flex gap-2 htu-actions">
     <a class="btn btn-primary" href="{% url 'academics:college_list' %}">Manage Academic Data</a>
     <a class="btn btn-primary" href="{% url 'scheduling:section_list' %}">Manage Sections</a>
     <a class="btn btn-primary" href="{% url 'enrollment:enrollment_list' %}">Manage Enrollments</a>

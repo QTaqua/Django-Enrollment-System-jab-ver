@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h2>Reports</h2>
+<p class="text-muted">Read-only institutional reports. Figures are generated live from current records.</p>
+<div class="list-group" style="max-width: 640px;">
+    {% if role == 'REGISTRAR' or role == 'ADMINISTRATOR' %}
+        <a class="list-group-item list-group-item-action" href="{% url 'reports:enrolled' %}">
+            <strong>Enrolled Students per Course &amp; Year Level</strong>
+            <div class="text-muted small">Who is enrolled, by course, section, and year level.</div>
+        </a>
+        <a class="list-group-item list-group-item-action" href="{% url 'reports:semester' %}">
+            <strong>Total Enrollment per Semester</strong>
+            <div class="text-muted small">Distinct students and active enrollment records per term.</div>
+        </a>
+    {% endif %}
+    {% if role == 'CASHIER' or role == 'ADMINISTRATOR' %}
+        <a class="list-group-item list-group-item-action" href="{% url 'reports:collection' %}">
+            <strong>Collection Report</strong>
+            <div class="text-muted small">Recorded received collections by method; scholarship funding shown separately.</div>
+        </a>
+    {% endif %}
+</div>
+{% endblock %}

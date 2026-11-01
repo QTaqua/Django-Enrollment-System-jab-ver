@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from accounts.forms import BootstrapFormMixin
 from accounts.models import User
 from academics.models import AcademicTerm, Course, Instructor
-from scheduling.models import Section
+from scheduling.models import Room, Section
 
 
 class SectionForm(BootstrapFormMixin, forms.ModelForm):
@@ -24,6 +24,7 @@ class SectionForm(BootstrapFormMixin, forms.ModelForm):
             "instructor",
             "section_code",
             "capacity",
+            "room",
             "room_code",
             "day_of_week",
             "start_time",
@@ -51,6 +52,13 @@ class SectionForm(BootstrapFormMixin, forms.ModelForm):
                 f"{instructor.employee_number} - "
                 f"{instructor.user.get_full_name() or instructor.user.username}"
             )
+        )
+        self.fields["room"].queryset = Room.objects.filter(
+            is_active=True
+        ).order_by("room_code")
+        self.fields["room"].required = False
+        self.fields["room"].label_from_instance = (
+            lambda room: f"{room.room_code} - {room.name}" if room.name else room.room_code
         )
         self.fields["day_of_week"].required = False
         self.fields["start_time"].required = False

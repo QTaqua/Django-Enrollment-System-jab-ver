@@ -232,6 +232,18 @@ class EnrollmentConfirmView(RegistrarRequiredMixin, View):
             messages.error(request, CONFLICT_ERROR)
         else:
             messages.success(request, "Enrollment confirmed successfully.")
+            # A DRAFT assessment is created automatically on confirmation; it is
+            # never auto-finalized. Failures here do not undo the confirmation.
+            try:
+                from finance.services import create_draft_assessment
+
+                create_draft_assessment(enrollment=enrollment, by=request.user)
+            except ValidationError as exc:
+                messages.warning(
+                    request,
+                    "Enrollment confirmed, but a draft assessment could not be "
+                    "created: " + " ".join(exc.messages),
+                )
         return redirect("enrollment:enrollment_detail", pk=enrollment.pk)
 
 

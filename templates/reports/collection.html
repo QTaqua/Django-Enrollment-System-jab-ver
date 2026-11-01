@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="htu-report-head">
+    <h2>{{ title }}</h2>
+    <p class="text-muted mb-1">Holy Trinity University · Enrollment System — generated {{ generated_at|date:"Y-m-d H:i" }}</p>
+</div>
+<div class="alert alert-secondary d-print-none">
+    Figures are <strong>recorded collections</strong> (RECEIVED payments only) — <em>not</em> externally
+    reconciled. Pending, cancelled, and reversed payments are excluded. Scholarship funding is shown
+    separately and is not counted as cash/electronic collection. DEMO data.
+</div>
+
+<form method="get" class="row g-2 mb-3 d-print-none">
+    <div class="col-auto">
+        <select name="term" class="form-select">
+            <option value="">All terms</option>
+            {% for t in terms %}<option value="{{ t.id }}" {% if filters.term == t.id|stringformat:'s' %}selected{% endif %}>{{ t }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <select name="method" class="form-select">
+            <option value="">All methods</option>
+            {% for value, label in method_choices %}<option value="{{ value }}" {% if filters.method == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-auto"><input type="date" name="date_from" value="{{ filters.date_from }}" class="form-control" title="From date"></div>
+    <div class="col-auto"><input type="date" name="date_to" value="{{ filters.date_to }}" class="form-control" title="To date"></div>
+    <div class="col-auto"><button class="btn btn-primary" type="submit">Filter</button></div>
+    <div class="col-auto"><a class="btn btn-outline-secondary" href="{{ csv_url }}">Export CSV</a></div>
+    <div class="col-auto"><button type="button" class="btn btn-outline-secondary" onclick="window.print()">Print / Save as PDF</button></div>
+</form>
+
+<h3 class="h5">Collections by method</h3>
+<div class="table-responsive">
+<table class="table table-sm align-middle" style="max-width: 560px;">
+    <thead><tr><th>Method</th><th class="text-end">Count</th><th class="text-end">Amount</th></tr></thead>
+    <tbody>
+    {% for m in by_method %}
+        <tr><td>{{ m.method }}</td><td class="text-end">{{ m.count }}</td><td class="text-end">₱{{ m.total|floatformat:2 }}</td></tr>
+    {% empty %}
+        <tr><td colspan="3" class="text-muted">No received payments match the filters.</td></tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr><th>Total recorded collections</th><th class="text-end">{{ payments_count }}</th><th class="text-end">₱{{ payments_total|floatformat:2 }}</th></tr>
+        <tr><td>Scholarship funding (separate, not cash)</td><td class="text-end">{{ scholarship_count }}</td><td class="text-end">₱{{ scholarship_total|floatformat:2 }}</td></tr>
+    </tfoot>
+</table>
+</div>
+{% endblock %}

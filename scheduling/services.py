@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from academics.models import Instructor
-from scheduling.models import Section
+from scheduling.models import Room, Section
 
 # Imported lazily where required to keep the scheduling/enrollment coupling
 # limited to a single direction at module import time.
@@ -33,6 +33,30 @@ def _instructor_has_conflict(
         return False
     conflicts = Section.objects.filter(
         instructor=instructor,
+        term=term,
+        day_of_week=day_of_week,
+        start_time__lt=end_time,
+        end_time__gt=start_time,
+    ).exclude(status=Section.Status.CANCELLED)
+    if exclude_section_id is not None:
+        conflicts = conflicts.exclude(pk=exclude_section_id)
+    return conflicts.exists()
+
+
+def _room_has_conflict(
+    *, room, term, day_of_week, start_time, end_time, exclude_section_id=None
+):
+    """Return True when another non-cancelled section books the same room.
+
+    A TBA room (``room is None``) or an incomplete (TBA) schedule never
+    conflicts. CANCELLED sections do not occupy a room. Adjacent slots are
+    allowed because the overlap test is strict (``start < other_end`` and
+    ``end > other_start``).
+    """
+    if room is None or day_of_week is None or start_time is None or end_time is None:
+        return False
+    conflicts = Section.objects.filter(
+        room=room,
         term=term,
         day_of_week=day_of_week,
         start_time__lt=end_time,
@@ -123,6 +147,7 @@ def create_section(
     section_code,
     capacity,
     instructor=None,
+    room=None,
     room_code="",
     day_of_week=None,
     start_time=None,
@@ -136,6 +161,10 @@ def create_section(
             # Serialize section creation per instructor so two concurrent
             # requests cannot both pass the conflict check.
             instructor = Instructor.objects.select_for_update().get(pk=instructor.pk)
+        if room is not None:
+            # Serialize per room so concurrent requests cannot both pass the
+            # room double-booking check.
+            room = Room.objects.select_for_update().get(pk=room.pk)
         _validate_instructor(instructor)
         _validate_schedule_values(day_of_week, start_time, end_time)
         _validate_capacity(capacity)
@@ -150,12 +179,24 @@ def create_section(
                 "This instructor already has an overlapping section on the "
                 "selected day and time in this academic term."
             )
+        if _room_has_conflict(
+            room=room,
+            term=term,
+            day_of_week=day_of_week,
+            start_time=start_time,
+            end_time=end_time,
+        ):
+            raise ValidationError(
+                "This room is already booked for an overlapping time on the "
+                "selected day in this academic term."
+            )
         section = Section(
             course=course,
             term=term,
             section_code=section_code,
             capacity=capacity,
             instructor=instructor,
+            room=room,
             room_code=room_code,
             day_of_week=day_of_week,
             start_time=start_time,
@@ -174,6 +215,7 @@ def update_section(
     section_code=_UNSET,
     capacity=_UNSET,
     instructor=_UNSET,
+    room=_UNSET,
     room_code=_UNSET,
     day_of_week=_UNSET,
     start_time=_UNSET,
@@ -193,6 +235,10 @@ def update_section(
         if instructor is not None:
             instructor = Instructor.objects.select_for_update().get(pk=instructor.pk)
         _validate_instructor(instructor)
+
+        room_obj = section.room if room is _UNSET else room
+        if room_obj is not None:
+            room_obj = Room.objects.select_for_update().get(pk=room_obj.pk)
 
         new_course = section.course if course is _UNSET else course
         new_term = section.term if term is _UNSET else term
@@ -254,6 +300,19 @@ def update_section(
                 "selected day and time in this academic term."
             )
 
+        if _room_has_conflict(
+            room=room_obj,
+            term=new_term,
+            day_of_week=new_day,
+            start_time=new_start,
+            end_time=new_end,
+            exclude_section_id=section.pk,
+        ):
+            raise ValidationError(
+                "This room is already booked for an overlapping time on the "
+                "selected day in this academic term."
+            )
+
         if (
             schedule_complete
             and active_enrolled.exists()
@@ -277,6 +336,7 @@ def update_section(
         section.section_code = new_code
         section.capacity = new_capacity
         section.instructor = instructor
+        section.room = room_obj
         section.room_code = new_room
         section.day_of_week = new_day
         section.start_time = new_start

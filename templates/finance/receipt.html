@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Receipt {{ payment.receipt_number }}{% endblock %}
+{% block content %}
+<div class="htu-receipt">
+    <div class="d-flex align-items-center gap-3 mb-3">
+        <img src="{% static 'img/htu-seal.png' %}" alt="" width="56" height="56">
+        <div>
+            <div class="fw-bold">Holy Trinity University · Enrollment System</div>
+            <div class="text-muted small">Payment acknowledgment (DEMO — not an official receipt)</div>
+        </div>
+    </div>
+    <dl class="row mb-3">
+        <dt class="col-sm-4">Receipt / Reference No.</dt><dd class="col-sm-8">{{ payment.receipt_number }}</dd>
+        <dt class="col-sm-4">Date</dt><dd class="col-sm-8">{{ payment.payment_date|date:"Y-m-d H:i" }}</dd>
+        <dt class="col-sm-4">Student</dt>
+        <dd class="col-sm-8">{{ assessment.enrollment.student.student_number }} —
+            {{ assessment.enrollment.student.user.get_full_name|default:assessment.enrollment.student.user.username }}</dd>
+        <dt class="col-sm-4">Academic Term</dt><dd class="col-sm-8">{{ assessment.enrollment.term }}</dd>
+        <dt class="col-sm-4">Method</dt><dd class="col-sm-8">{{ payment.get_method_display }}</dd>
+        <dt class="col-sm-4">Status</dt><dd class="col-sm-8">{{ payment.get_status_display }}</dd>
+        <dt class="col-sm-4">Amount</dt><dd class="col-sm-8"><strong>₱{{ payment.amount|floatformat:2 }}</strong></dd>
+        <dt class="col-sm-4">Received by</dt><dd class="col-sm-8">{{ payment.received_by.get_full_name|default:payment.received_by.username }}</dd>
+        <dt class="col-sm-4">Balance after payment</dt><dd class="col-sm-8">₱{{ balance|floatformat:2 }}</dd>
+    </dl>
+</div>
+<div class="d-print-none htu-form-actions">
+    <button type="button" class="btn btn-primary" onclick="window.print()">Print</button>
+    <a class="btn btn-outline-secondary" href="{% url 'finance:assessment_detail' assessment.pk %}">Back to assessment</a>
+</div>
+{% endblock %}

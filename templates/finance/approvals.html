@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Finance Approvals{% endblock %}
+{% block content %}
+<h2>Finance Approvals</h2>
+<p class="text-muted">Administrator-only. A transaction's creator cannot approve their own request.</p>
+
+<h3 class="h5 mt-3">Pending adjustments</h3>
+{% if adjustments %}
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+    <thead><tr><th>Type</th><th class="text-end">Amount</th><th>Reason</th><th>Requested by</th><th></th></tr></thead>
+    <tbody>
+    {% for a in adjustments %}
+        <tr>
+            <td>{{ a.get_adjustment_type_display }}</td>
+            <td class="text-end">₱{{ a.amount|floatformat:2 }}</td>
+            <td>{{ a.reason }}</td>
+            <td>{{ a.created_by.username|default:"—" }}</td>
+            <td class="d-flex gap-1">
+                <form method="post" action="{% url 'finance:adjustment_action' a.pk 'approve' %}">{% csrf_token %}
+                    <button class="btn btn-sm btn-success" type="submit">Approve</button></form>
+                <form method="post" action="{% url 'finance:adjustment_action' a.pk 'reject' %}">{% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Reject</button></form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}<p class="text-muted">No pending adjustments.</p>{% endif %}
+
+<h3 class="h5 mt-4">Pending scholarships</h3>
+{% if scholarships %}
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+    <thead><tr><th>Student</th><th>Sponsor</th><th class="text-end">Amount</th><th>Requested by</th><th></th></tr></thead>
+    <tbody>
+    {% for s in scholarships %}
+        <tr>
+            <td>{{ s.student.student_number }}</td>
+            <td>{{ s.sponsor }}</td>
+            <td class="text-end">₱{{ s.amount|floatformat:2 }}</td>
+            <td>{{ s.created_by.username|default:"—" }}</td>
+            <td>
+                <form method="post" action="{% url 'finance:scholarship_action' s.pk 'approve' %}">{% csrf_token %}
+                    <button class="btn btn-sm btn-success" type="submit">Approve</button></form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}<p class="text-muted">No pending scholarships.</p>{% endif %}
+
+{% if approved_scholarships %}
+<h3 class="h5 mt-4">Approved scholarships (apply)</h3>
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+    <thead><tr><th>Student</th><th>Sponsor</th><th class="text-end">Amount</th><th></th></tr></thead>
+    <tbody>
+    {% for s in approved_scholarships %}
+        <tr>
+            <td>{{ s.student.student_number }}</td>
+            <td>{{ s.sponsor }}</td>
+            <td class="text-end">₱{{ s.amount|floatformat:2 }}</td>
+            <td>
+                <form method="post" action="{% url 'finance:scholarship_action' s.pk 'apply' %}">{% csrf_token %}
+                    <button class="btn btn-sm btn-primary" type="submit">Apply</button></form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

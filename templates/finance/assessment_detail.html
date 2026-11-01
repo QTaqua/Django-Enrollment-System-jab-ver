@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Assessment #{{ assessment.pk }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 htu-page-head">
+    <h2>Assessment — {{ assessment.enrollment.student.student_number }}</h2>
+    <a class="btn btn-outline-secondary" href="{% url 'finance:assessment_list' %}">Back</a>
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Student</dt>
+    <dd class="col-sm-9">{{ assessment.enrollment.student.user.get_full_name|default:assessment.enrollment.student.user.username }}
+        ({{ assessment.enrollment.student.student_number }})</dd>
+    <dt class="col-sm-3">Academic Term</dt>
+    <dd class="col-sm-9">{{ assessment.enrollment.term }}</dd>
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">{{ assessment.get_status_display }}
+        {% if version %}(v{{ version.version_number }}){% endif %}
+        {% if assessment.needs_review %}<span class="badge bg-warning text-dark">Needs review — fee rules changed</span>{% endif %}</dd>
+</dl>
+
+<div class="alert alert-secondary">
+    <strong>DEMO figures.</strong> Fee values are fictional demonstration data and are not official HTU tuition or fees.
+</div>
+
+<h3 class="h5 mt-3">Itemized charges{% if version %} (v{{ version.version_number }}){% endif %}</h3>
+{% if lines %}
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+    <thead><tr><th>Category</th><th>Description</th><th class="text-end">Qty</th><th class="text-end">Rate</th><th class="text-end">Amount</th></tr></thead>
+    <tbody>
+    {% for line in lines %}
+        <tr>
+            <td>{{ line.get_fee_category_display }}</td>
+            <td>{{ line.description }}</td>
+            <td class="text-end">{% if line.quantity is not None %}{{ line.quantity|floatformat:2 }}{% else %}—{% endif %}</td>
+            <td class="text-end">₱{{ line.unit_amount|floatformat:2 }}</td>
+            <td class="text-end">₱{{ line.line_total|floatformat:2 }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr><th colspan="4" class="text-end">Total</th><th class="text-end">₱{{ assessment.total_amount|floatformat:2 }}</th></tr>
+        <tr><td colspan="4" class="text-end">Amount paid</td><td class="text-end">₱{{ amount_paid|floatformat:2 }}</td></tr>
+        <tr><th colspan="4" class="text-end">Balance</th><th class="text-end">₱{{ balance|floatformat:2 }}</th></tr>
+    </tfoot>
+</table>
+</div>
+{% else %}
+<p class="text-muted">No itemized charges yet (no applicable fee rules).</p>
+{% endif %}
+
+<div class="htu-actions d-flex gap-2 mb-4">
+    {% if can_manage and not assessment.is_finalized %}
+        <form method="post" action="{% url 'finance:finalize' assessment.pk %}">{% csrf_token %}
+            <button class="btn btn-primary" type="submit">Finalize Assessment</button></form>
+    {% endif %}
+    {% if can_manage and assessment.is_finalized %}
+        <a class="btn btn-outline-primary" href="{% url 'finance:revise' assessment.pk %}">Revise</a>
+    {% endif %}
+    {% if can_pay %}
+        <a class="btn btn-success" href="{% url 'finance:record_payment' assessment.pk %}">Record Payment</a>
+    {% endif %}
+    {% if can_create_adjustment %}
+        <a class="btn btn-outline-secondary" href="{% url 'finance:adjustment_create' assessment.pk %}">New Adjustment</a>
+    {% endif %}
+</div>
+
+<h3 class="h5">Payments</h3>
+{% if payments %}
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+    <thead><tr><th>Receipt</th><th>Date</th><th>Method</th><th class="text-end">Amount</th><th>Status</th><th class="text-end">Allocated</th><th></th></tr></thead>
+    <tbody>
+    {% for p in payments %}
+        <tr>
+            <td>{{ p.receipt_number }}</td>
+            <td>{{ p.payment_date|date:"Y-m-d H:i" }}</td>
+            <td>{{ p.get_method_display }}</td>
+            <td class="text-end">₱{{ p.amount|floatformat:2 }}</td>
+            <td>{{ p.get_status_display }}</td>
+            <td class="text-end">₱{{ p.allocated_amount|floatformat:2 }}</td>
+            <td>
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'finance:receipt' p.pk %}">Receipt</a>
+                {% if can_approve and p.status == 'RECEIVED' %}
+                <form method="post" action="{% url 'finance:reverse_payment' p.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="reason" value="Reversed by administrator">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Reverse</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="text-muted">No payments recorded.</p>
+{% endif %}
+
+{% if adjustments %}
+<h3 class="h5 mt-3">Adjustments</h3>
+<ul class="list-group mb-3">
+{% for a in adjustments %}
+    <li class="list-group-item d-flex justify-content-between">
+        <span>{{ a.get_adjustment_type_display }} ₱{{ a.amount|floatformat:2 }} — {{ a.reason }}</span>
+        <span class="text-muted">{{ a.get_status_display }}</span>
+    </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if scholarships %}
+<h3 class="h5 mt-3">Scholarships</h3>
+<ul class="list-group mb-3">
+{% for s in scholarships %}
+    <li class="list-group-item d-flex justify-content-between">
+        <span>{{ s.sponsor }} — ₱{{ s.amount|floatformat:2 }}</span>
+        <span class="text-muted">{{ s.get_status_display }}</span>
+    </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<h3 class="h5 mt-3">Version history</h3>
+<ul class="list-group">
+{% for v in versions %}
+    <li class="list-group-item d-flex justify-content-between">
+        <span>v{{ v.version_number }} — {{ v.get_status_display }}{% if v.revision_reason %} ({{ v.revision_reason }}){% endif %}</span>
+        <span class="text-muted">₱{{ v.total_amount|floatformat:2 }}</span>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}
