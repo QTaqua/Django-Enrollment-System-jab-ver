@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h2>{{ title }}</h2>
+<dl class="row">
+    {% for label, field in fields %}
+        <dt class="col-sm-3">{{ label }}</dt>
+        <dd class="col-sm-9">{{ object|display:field }}</dd>
+    {% endfor %}
+</dl>
+<div class="d-flex gap-2">
+    {% if can_edit and update_url_name %}
+        <a class="btn btn-primary" href="{% url update_url_name object.pk %}">Edit</a>
+    {% endif %}
+    {% if list_url_name %}
+        <a class="btn btn-outline-secondary" href="{% url list_url_name %}">Back to list</a>
+    {% endif %}
+</div>
+{% endblock %}

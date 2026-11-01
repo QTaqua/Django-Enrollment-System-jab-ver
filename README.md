@@ -1,13 +1,15 @@
-# Django College Enrollment System
+# ADS Enrollment System
 
-A reusable, generic college-level enrollment management system built with Django and
-MySQL. It models a semester-based academic structure and provides the data layer,
-constraints, and transactional service rules needed for academic records, curriculum
-management, class scheduling, enrollment, assessment, and payment tracking.
+A college enrollment management system built with Django and MySQL. The
+simplified design uses 15 business tables and a single weekly meeting per course
+section. It provides authentication and role-based dashboards, academic master
+data, student and instructor profiles, section management, enrollment creation
+and confirmation, a read-only student enrollment portal, and a small finance data
+layer.
 
-The project is intended as a foundation: the domain models and service-layer rules are
-implemented, while the user-facing interface is not yet built (see
-[Current limitations](#current-limitations)).
+This repository contains the simplified ADS implementation. The original,
+larger data model has been replaced, but the repository's Git history is
+preserved.
 
 ## Technology stack
 
@@ -21,112 +23,118 @@ implemented, while the user-facing interface is not yet built (see
 | sqlparse | 0.6.0 |
 | tzdata | 2026.5 |
 
-Versions above were verified in the local development environment. Django 5.2 requires
-Python 3.10 or newer; this project is developed and tested against Python 3.13.
+Django 5.2 requires Python 3.10 or newer. The versions above are the verified
+development environment.
 
-## Features
+## Roles
 
-The domain is split into five Django applications:
+The custom user model is `accounts.User` (table `app_user`). Authentication uses
+Django's normal username/password flow, and a coarse `role` field drives
+authorization.
 
-- **accounts** – custom user model (`accounts.User`, table `app_user`) with a coarse
-  `role` field (administrator, registrar, cashier, instructor, student) on top of
-  Django's authentication, groups, and permissions.
-- **academics** – colleges, programs, curricula, courses, curriculum course placement,
-  course prerequisites, academic terms, students, and instructors.
-- **scheduling** – rooms, course sections offered per term, and weekly section meetings.
-- **enrollment** – a student's enrollment per term, its section-level details, and
-  final course results.
-- **finance** – fee types, scoped fee rules, assessments and assessment lines, payments,
-  and payment allocations.
+| Role | Current access |
+| --- | --- |
+| Administrator | Read-only access to academic master data, people, sections, and enrollments in the web application. Staff administrators can also use the custom Django admin site; some admin models are read-only. |
+| Registrar | Creates and updates academic master data, student and instructor accounts, sections, and enrollments. Creates DRAFT enrollments, adds/removes sections, and confirms enrollments. |
+| Cashier | Role dashboard only. Finance services exist, but no cashier/payment screens are implemented yet. |
+| Student | Dashboard and read-only access to their own enrollment records. Students cannot view another student's enrollment by changing a URL. |
+| Instructor | Role dashboard only. No instructor section or grading screens are implemented yet. |
 
-Business rules that span multiple rows are implemented in service modules
-(`enrollment/services.py`, `scheduling/services.py`, `finance/services.py`) rather than
-inside triggers. Examples include prerequisite checking against passed results,
-duplicate-course prevention, room/instructor overlap detection, fee-rule precedence,
-assessment finalization immutability, and payment allocation limits.
+Administrators are read-only on the Registrar screens, including section and
+enrollment write endpoints. Cashier and Instructor accounts cannot use Registrar
+screens.
 
-## Prerequisites
+## Implemented features
 
-- Python 3.13 (3.10+ should work, but 3.13.7 is the verified version)
-- MySQL Server 8.0+ (9.5.0 verified) with a database and user you can use
-- A C compiler and Python headers if `mysqlclient` must be built from source
-  (on Windows, the Visual C++ Build Tools are typically required)
-- Git
+### Authentication and dashboards
 
-## Local setup (Windows PowerShell)
+- Role-aware login redirects each user to the correct dashboard.
+- Inactive accounts are denied access; anonymous users are redirected to login.
+- Shared Bootstrap-based layout and navigation.
+- The custom admin site at `/admin/` is restricted to staff users with the
+  Administrator role.
 
-```powershell
-# From the project root
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+### Academic master data
 
-# If PowerShell blocks the activation script for the current session:
-# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+Registrar-managed list, detail, create, and update screens for:
 
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+- Colleges
+- Programs
+- Curricula
+- Courses
+- Curriculum course placements
+- Course prerequisites
+- Academic terms
 
-## Database and environment configuration
+Academic terms carry their dates and an `enrollment_open` flag. Administrators
+can view these records but cannot modify them from the web screens.
 
-1. Create an empty database and a dedicated MySQL user. Example (run in a MySQL client
-   as an administrative user, replacing the placeholders):
+### Student and instructor profiles
 
-   ```sql
-   CREATE DATABASE ads_enrollment
-     CHARACTER SET utf8mb4
-     COLLATE utf8mb4_unicode_ci;
-   ```
+Registrar-managed account creation and profile updates for students and
+instructors. Student profiles include a student number, curriculum, and year
+level. Instructor profiles include an employee number. Personal names and
+contact details live on the shared user record.
 
-2. Copy the environment template and fill in your own values:
+### Section management
 
-   ```powershell
-   Copy-Item .env.example .env
-   ```
+Sections are offered per course and academic term, with:
 
-   `.env` is git-ignored and must never be committed. It supports the following
-   variables:
+- Section code, capacity, room code, day of week, start time, and end time.
+- Optional instructor assignment.
+- OPEN, CLOSED, and CANCELLED statuses.
+- TBA schedules (day, start, and end all blank) and complete schedules.
+- Validation that partial schedules are rejected and end time is later than
+  start time.
+- Instructor overlap prevention for the same term and day/time.
+- Protection against reducing capacity below the number of actively enrolled
+  students.
+- Protection against cancelling a section that has active enrolled students.
+- Protection against course or term changes once enrollment records exist.
+- Protection against schedule changes that would conflict with already enrolled
+  students' other sections.
 
-   | Variable | Purpose | Example placeholder |
-   | --- | --- | --- |
-   | `DJANGO_SECRET_KEY` | Django secret key | `replace-with-a-long-random-value` |
-   | `DJANGO_DEBUG` | Debug mode | `True` |
-   | `DJANGO_ALLOWED_HOSTS` | Comma-separated allowed hosts | `localhost,127.0.0.1` |
-   | `DB_NAME` | Database name | `ads_enrollment` |
-   | `DB_USER` | Database user | `your-db-user` |
-   | `DB_PASSWORD` | Database password | `your-db-password` |
-   | `DB_HOST` | Database host | `localhost` |
-   | `DB_PORT` | Database port | `3306` |
+TBA sections and sections without an OPEN status cannot receive new enrollment.
+CLOSED sections do not accept new enrollment, but existing enrollment records
+remain valid. There is no separate room entity and no room-conflict validation.
 
-   Real environment variables take precedence over values in `.env`.
+### Enrollment workflow
 
-3. Apply the schema with Django migrations:
+Registrar-managed enrollment records:
 
-   ```powershell
-   python manage.py migrate
-   ```
+- One enrollment per student per academic term.
+- New enrollments start as DRAFT and require an open enrollment period.
+- A DRAFT enrollment may still be confirmed after the enrollment period closes.
+- Sections can be added only to a DRAFT enrollment in its own academic term.
+- A section must be OPEN, have a complete schedule, have available capacity, and
+  not already be part of the enrollment.
+- The course must be in the student's curriculum.
+- Duplicate sections of the same course are rejected within one enrollment.
+- Prerequisites must be satisfied by a prior-term detail that is both
+  `COMPLETED` and `PASSED`; numeric grades never imply a pass.
+- Overlapping sections for the same student, term, and day are rejected.
+- Removing a section marks its detail as `DROPPED` with a recorded result status
+  and timestamp; the detail is preserved, not deleted.
+- Confirmation requires at least one active ENROLLED detail and revalidates the
+  section term, schedule completeness, capacity, and cancellation status.
+- Enrollment cancellation is intentionally not exposed because the unique
+  student/term constraint includes cancelled records.
 
-4. Create an administrative account and start the development server:
+Students can view their own enrollment list and details at `/my-enrollments/`.
+The student portal is read-only.
 
-   ```powershell
-   python manage.py createsuperuser
-   python manage.py runserver
-   ```
+### Finance data layer
 
-The application is then available at <http://127.0.0.1:8000/>; the Django admin site is
-at <http://127.0.0.1:8000/admin/>.
+The finance app currently provides the data model and service helpers only:
 
-### Useful commands
+- One `Assessment` per enrollment, with a derived balance.
+- `Payment` records with receipt numbers, methods, and statuses.
+- `record_payment()` records a positive payment against an assessment.
+- `assessment_balance()` derives the balance from the assessment total minus
+  received payments.
 
-```powershell
-python manage.py check                        # configuration/model checks
-python manage.py makemigrations --check --dry-run  # detect missing migrations
-python manage.py showmigrations               # list migration status
-python manage.py migrate                      # apply pending migrations
-```
-
-Only run `makemigrations` when you have intentionally changed a model; the repository
-already contains the initial migrations for all five applications.
+There are no finance screens in this phase. Do not assume a cashier or payment
+UI exists.
 
 ## Project structure
 
@@ -136,99 +144,218 @@ already contains the initial migrations for all five applications.
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
-├── config/                  # Django project package
-│   ├── settings.py          # environment-driven configuration
-│   ├── urls.py              # currently exposes only the admin site
-│   ├── asgi.py
-│   └── wsgi.py
-├── accounts/                # custom user and roles
-│   ├── models.py
-│   └── migrations/
-├── academics/               # colleges, programs, curricula, courses, terms, people
-│   ├── models.py
-│   └── migrations/
-├── scheduling/              # rooms, sections, meetings
-│   ├── models.py
-│   ├── services.py
-│   └── migrations/
-├── enrollment/              # enrollments, details, results
-│   ├── models.py
-│   ├── services.py
-│   └── migrations/
-├── finance/                 # fees, assessments, payments, allocations
-│   ├── models.py
-│   ├── services.py
-│   └── migrations/
-└── erd_artifacts/           # design reference artifacts (see below)
-    ├── ADS_Enrollment_System_Final_Schema_REVISED.sql
-    ├── ADS_Enrollment_System_Final_Django_Compatible.mwb
-    └── Enrollment System ERD.png
+├── README.md
+├── config/                  # Django project package and URL routing
+├── accounts/                # custom user, roles, authentication, dashboards, people
+├── academics/               # colleges, programs, curricula, courses, terms
+├── scheduling/              # sections and section rules
+├── enrollment/              # enrollments, details, prerequisites, student portal
+├── finance/                 # assessments, payments, and finance service helpers
+├── templates/               # shared Bootstrap UI and role dashboards
+└── erd_artifacts/           # simplified schema and ERD reference artifacts
 ```
 
-Each application also contains the standard Django `admin.py`, `apps.py`, `tests.py`,
-and `views.py` modules.
+## Data model
 
-## Migrations are the source of truth
+The 15 business tables are:
 
-Database schema changes are managed exclusively by Django migrations.
+```text
+app_user
+college
+program
+curriculum
+course
+curriculum_course
+course_prerequisite
+academic_term
+student
+instructor
+section
+enrollment
+enrollment_detail
+assessment
+payment
+```
 
-- The initial migrations in each app describe the current schema and have been applied
-  to a local development database.
-- `python manage.py makemigrations --check --dry-run` reports no pending model changes.
-- Always create and apply schema changes through `makemigrations` / `migrate`.
+Django also creates its normal framework tables for authentication, permissions,
+sessions, content types, admin logs, and migrations.
 
-### Reference artifacts
+Key simplifications:
 
-The files under `erd_artifacts/` are **design and documentation artifacts only**:
+- No `Room` table: `section.room_code` is a free-text label.
+- No `SectionMeeting` table: each section has one weekly day/start/end schedule.
+- No separate `StudentCourseResult` table: final grade and result status live on
+  `enrollment_detail`.
+- All application primary keys use integer `AutoField`.
+- Foreign keys use `on_delete=PROTECT` for historical records.
+- Row-level rules use database constraints; cross-row rules live in service
+  modules.
 
-- `ADS_Enrollment_System_Final_Schema_REVISED.sql` is a schema-only SQL script generated
-  from the Django models for use in MySQL Workbench/ERD tooling.
-- `ADS_Enrollment_System_Final_Django_Compatible.mwb` is the MySQL Workbench EER model
-  that was imported from that script.
-- `Enrollment System ERD.png` is an exported diagram image.
+## Prerequisites
 
-Do **not** execute the SQL script against an application database as a substitute for
-migrations. It does not record migration state, and running it alongside `migrate`
-would conflict with the tables Django creates. If a fresh database is needed, use
-`python manage.py migrate`.
+- Python 3.13 (3.10+ should work; 3.13.7 is verified)
+- MySQL Server 8.0+ (9.5.0 verified)
+- A MySQL database and user you can use
+- A C compiler and Python headers if `mysqlclient` must be built from source
+  (on Windows, Visual C++ Build Tools are typically required)
+- Git
 
-## Data model notes
+## Setup
 
-- All application primary keys use integer `AutoField` columns
-  (`DEFAULT_AUTO_FIELD = "django.db.models.AutoField"`).
-- The custom user model is `accounts.User`, mapped to the `app_user` table. It must be
-  configured via `AUTH_USER_MODEL` before the first migration, which is already the case
-  here.
-- Foreign keys use `on_delete=PROTECT` for historical and referential records.
-- Database-level `UniqueConstraint` and `CheckConstraint` entries cover row-level rules;
-  cross-row rules live in the service layer.
-- `CoursePrerequisite` uses a surrogate integer primary key with a unique
-  `(course, prerequisite_course)` pair instead of a composite primary key.
-- `EnrollmentDetail` derives its course from the related section; no redundant course
-  column is stored.
+### 1. Create and activate a virtual environment
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# If PowerShell blocks the activation script for this session:
+# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 2. Create the MySQL database
+
+```sql
+CREATE DATABASE ads_enrollment_simplified
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+```
+
+Create or choose a MySQL user that can use this database. Do not commit database
+credentials.
+
+### 3. Configure the environment
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edit `.env` and set your own values. `.env` is git-ignored and must never be
+committed.
+
+| Variable | Purpose | Example |
+| --- | --- | --- |
+| `DJANGO_SECRET_KEY` | Django secret key | `replace-with-a-long-random-value` |
+| `DJANGO_DEBUG` | Debug mode | `True` |
+| `DJANGO_ALLOWED_HOSTS` | Comma-separated hosts | `localhost,127.0.0.1` |
+| `DB_NAME` | Database name | `ads_enrollment_simplified` |
+| `DB_USER` | Database user | `root` |
+| `DB_PASSWORD` | Database password | (your password) |
+| `DB_HOST` | Database host | `localhost` |
+| `DB_PORT` | Database port | `3306` |
+
+Real environment variables take precedence over values in `.env`.
+
+### 4. Apply migrations
+
+```powershell
+python manage.py migrate
+```
+
+### 5. Create an administrator
+
+```powershell
+python manage.py createsuperuser
+```
+
+New users default to the Student role, and the custom admin site requires the
+Administrator role. Promote the account before using `/admin/`:
+
+```powershell
+python manage.py shell -c "from accounts.models import User; u = User.objects.get(username='YOUR_USERNAME'); u.role = User.Role.ADMINISTRATOR; u.save(update_fields=['role'])"
+```
+
+Alternatively, create the account directly:
+
+```powershell
+python manage.py shell -c "from accounts.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'change-me', role=User.Role.ADMINISTRATOR)"
+```
+
+Do not keep a development password in source control.
+
+### 6. Run the development server
+
+```powershell
+python manage.py runserver
+```
+
+The application is available at <http://127.0.0.1:8000/>. The custom admin site
+is at <http://127.0.0.1:8000/admin/>.
+
+Main routes:
+
+| Route | Purpose |
+| --- | --- |
+| `/login/` | Login |
+| `/dashboard/` | Role-aware dashboard redirect |
+| `/academics/` | Academic master data |
+| `/people/` | Student and instructor profiles |
+| `/sections/` | Section management |
+| `/enrollments/` | Registrar enrollment management |
+| `/my-enrollments/` | Student's own enrollments |
+| `/admin/` | Administrator-only Django admin |
+
+## Testing
+
+Run the full suite:
+
+```powershell
+python manage.py test --noinput
+```
+
+The test runner creates and destroys the dedicated test database
+`test_ads_enrollment_simplified`. The application database is not used for tests.
+
+Useful checks:
+
+```powershell
+python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py showmigrations
+```
+
+The current suite contains 196 tests covering authentication, roles, academic
+master data, people, sections, enrollment rules, prerequisites, confirmation,
+removal, ownership, and Phase 6B/6C regressions.
+
+## Migrations and schema
+
+Django migrations are the source of truth for the schema. The repository already
+contains the initial migrations for all five applications.
+
+- Do not create schema changes by editing the database manually.
+- Run `makemigrations` only after an intentional model change.
+- Run `migrate` to apply pending migrations.
+
+## ERD artifacts
+
+The files under `erd_artifacts/` are design and documentation artifacts only:
+
+- `ADS_Enrollment_System_Simplified_Schema.sql` — schema-only SQL script for
+  MySQL Workbench/ERD tooling.
+- `ADS_Enrollment_System_Simplified.mwb` — MySQL Workbench EER model.
+- `ADS_Enrollment_System_Simplified_ERD.png` — exported ERD image.
+
+Do not execute the SQL script as a substitute for Django migrations. It does not
+record migration state. Use `python manage.py migrate` for a fresh database.
 
 ## Current limitations
 
-Verified against the current source tree:
-
-- **No custom web interface.** `config/urls.py` exposes only `admin/`, and the
-  application `views.py` modules are empty stubs.
-- **Application models are not registered in the Django admin.** The `admin.py` modules
-  are the default generated stubs, so the admin site shows only Django's built-in
-  authentication/admin models.
-- **Tests are placeholders.** The per-app `tests.py` files contain only the generated
-  `TestCase` stub; there is no automated test suite yet.
-- **MySQL is required at settings level.** The database engine is fixed to
-  `django.db.backends.mysql`; there is no SQLite fallback for local experiments.
-- **Development defaults.** `DEBUG` defaults to `True` and a development-only secret key
-  fallback exists when `DJANGO_SECRET_KEY` is unset. Both must be overridden for any
-  non-development environment, along with `DJANGO_ALLOWED_HOSTS`.
-- **Service-layer rules are not database triggers.** Prerequisite checks, duplicate
-  course prevention, capacity/overlap checks, fee-rule ambiguity detection, and payment
-  allocation limits must be invoked through the provided service functions; direct ORM
-  writes bypass them.
-
-## License
-
-No license has been declared for this project. Add one before distributing or accepting
-external contributions.
+- MySQL is required by settings; there is no SQLite fallback.
+- Finance has models and service helpers but no cashier or payment screens.
+- There is no grade-entry/finalization UI. Result fields exist on
+  `enrollment_detail`, but current screens do not record final grades.
+- Instructors have no section-management or grading screens yet.
+- There is no waitlist, enrollment cancellation UI, or self-service student
+  add/drop.
+- There is no separate room entity, so room-conflict detection is not possible.
+- Each section supports one weekly meeting only.
+- Cross-row rules are enforced by service functions, not database triggers.
+  Direct ORM writes can bypass prerequisite, capacity, and schedule checks.
+- Development defaults exist: `DEBUG` defaults to `True`, and an insecure secret
+  key fallback is used when `DJANGO_SECRET_KEY` is unset. Override both outside
+  development.
+- No license has been declared. Add one before distributing the project or
+  accepting external contributions.

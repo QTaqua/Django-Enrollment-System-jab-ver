@@ -10,6 +10,8 @@ file in the project root.  Nothing sensitive belongs in tracked source code.
 import os
 from pathlib import Path
 
+from django.contrib.messages import constants as message_constants
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -77,7 +79,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -94,7 +96,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME", "ads_enrollment"),
+        "NAME": os.environ.get("DB_NAME", "ads_enrollment_simplified"),
         "USER": os.environ.get("DB_USER", "root"),
         "PASSWORD": os.environ.get("DB_PASSWORD", ""),
         "HOST": os.environ.get("DB_HOST", "localhost"),
@@ -122,11 +124,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Manila"
 
 USE_I18N = True
 
 USE_TZ = True
+
+# Bootstrap uses "danger" for errors; Django's default tag is "error".
+MESSAGE_TAGS = {
+    message_constants.ERROR: "danger",
+}
 
 STATIC_URL = "static/"
 
@@ -135,3 +142,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Custom user model. Must be configured before the first migration is created.
 AUTH_USER_MODEL = "accounts.User"
+ 
+# Authentication
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "login"

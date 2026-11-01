@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}My Enrollments{% endblock %}
+{% block content %}
+<h2>My Enrollments</h2>
+{% if enrollments %}
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Academic Term</th>
+            <th>Courses</th>
+            <th>Enrollment Date</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for enrollment in enrollments %}
+        <tr>
+            <td>{{ enrollment.term }}</td>
+            <td>
+                {% for detail in enrollment.details.all %}
+                    {% if detail.status == 'ENROLLED' %}
+                        <span class="badge text-bg-secondary">{{ detail.section.course.course_code }}</span>
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ enrollment.enrollment_date|date:"Y-m-d" }}</td>
+            <td>{{ enrollment.get_status_display }}</td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'enrollment:my_enrollment_detail' enrollment.pk %}">View</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">You have no enrollments yet.</p>
+{% endif %}
+{% endblock %}

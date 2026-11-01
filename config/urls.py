@@ -1,22 +1,30 @@
 """
 URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
+from django.contrib.auth import logout
+from django.urls import include, path
+from django.shortcuts import redirect
+
+from accounts.permissions import get_dashboard_url
+from accounts import admin_site
+
+ads_admin_site = admin_site.ads_admin_site
+
+
+def home_redirect(request):
+    if request.user.is_authenticated:
+        if request.user.is_active:
+            return redirect(get_dashboard_url(request.user))
+        logout(request)
+    return redirect("login")
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("", home_redirect, name="home"),
+    path("admin/", ads_admin_site.urls),
+    path("", include("accounts.urls")),
+    path("academics/", include("academics.urls")),
+    path("sections/", include("scheduling.urls")),
+    path("people/", include("accounts.people_urls")),
+    path("", include("enrollment.urls")),
 ]

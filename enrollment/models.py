@@ -1,5 +1,23 @@
+from decimal import Decimal
+
 from django.db import models
 from django.utils import timezone
+
+# PSU 1.00-5.00 grading scale.  INC and DRP are represented by
+# ``EnrollmentDetail.result_status``, never by a numeric grade.
+PSU_GRADE_VALUES = [
+    Decimal("1.00"),
+    Decimal("1.25"),
+    Decimal("1.50"),
+    Decimal("1.75"),
+    Decimal("2.00"),
+    Decimal("2.25"),
+    Decimal("2.50"),
+    Decimal("2.75"),
+    Decimal("3.00"),
+    Decimal("4.00"),
+    Decimal("5.00"),
+]
 
 
 class Enrollment(models.Model):
@@ -7,7 +25,6 @@ class Enrollment(models.Model):
 
     class Status(models.TextChoices):
         DRAFT = "DRAFT", "Draft"
-        SUBMITTED = "SUBMITTED", "Submitted"
         CONFIRMED = "CONFIRMED", "Confirmed"
         CANCELLED = "CANCELLED", "Cancelled"
 
@@ -40,19 +57,24 @@ class Enrollment(models.Model):
 
 
 class EnrollmentDetail(models.Model):
-    """One section added to an enrollment.
+    """One section added to an enrollment, with its final result.
 
     The course is derived from ``section.course``; no redundant course column
-    is stored.  Uniqueness of (enrollment, section) is enforced by the
-    database.  Preventing two sections of the same course in one enrollment is
-    a cross-row rule handled by ``enrollment.services``.
+    is stored.  The separate ``student_course_result`` table from the original
+    design is folded in here.
     """
 
     class Status(models.TextChoices):
         ENROLLED = "ENROLLED", "Enrolled"
         DROPPED = "DROPPED", "Dropped"
-        WITHDRAWN = "WITHDRAWN", "Withdrawn"
         COMPLETED = "COMPLETED", "Completed"
+
+    class ResultStatus(models.TextChoices):
+        PASSED = "PASSED", "Passed"
+        FAILED = "FAILED", "Failed"
+        INCOMPLETE = "INCOMPLETE", "Incomplete"
+        DROPPED = "DROPPED", "Dropped"
+        WITHDRAWN = "WITHDRAWN", "Withdrawn"
 
     id = models.AutoField(primary_key=True)
     enrollment = models.ForeignKey(
@@ -71,6 +93,16 @@ class EnrollmentDetail(models.Model):
         max_length=20, choices=Status.choices, default=Status.ENROLLED
     )
     enrolled_at = models.DateTimeField(default=timezone.now)
+    final_grade = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    result_status = models.CharField(
+        max_length=20,
+        choices=ResultStatus.choices,
+        null=True,
+        blank=True,
+    )
+    recorded_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "enrollment_detail"
@@ -79,6 +111,13 @@ class EnrollmentDetail(models.Model):
             models.UniqueConstraint(
                 fields=["enrollment", "section"],
                 name="uq_enrollment_detail_section",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(final_grade__isnull=True)
+                    | models.Q(final_grade__in=PSU_GRADE_VALUES)
+                ),
+                name="ck_enrollment_detail_psu_grade",
             ),
         ]
 
@@ -89,42 +128,3 @@ class EnrollmentDetail(models.Model):
 
     def __str__(self):
         return f"{self.enrollment} -> {self.section}"
-
-
-class StudentCourseResult(models.Model):
-    """Final result for one enrollment detail.
-
-    Prerequisite checks treat ``PASSED`` as satisfying a prerequisite; merely
-    having enrolled in (or dropped) the prerequisite course does not.
-    """
-
-    class ResultStatus(models.TextChoices):
-        PASSED = "PASSED", "Passed"
-        FAILED = "FAILED", "Failed"
-        INCOMPLETE = "INCOMPLETE", "Incomplete"
-        DROPPED = "DROPPED", "Dropped"
-        WITHDRAWN = "WITHDRAWN", "Withdrawn"
-
-    id = models.AutoField(primary_key=True)
-    enrollment_detail = models.OneToOneField(
-        EnrollmentDetail,
-        on_delete=models.PROTECT,
-        related_name="result",
-        db_column="enrollment_detail_id",
-    )
-    final_grade = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
-    )
-    result_status = models.CharField(max_length=20, choices=ResultStatus.choices)
-    recorded_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        db_table = "student_course_result"
-        ordering = ["-recorded_at"]
-
-    @property
-    def is_passing(self):
-        return self.result_status == self.ResultStatus.PASSED
-
-    def __str__(self):
-        return f"{self.enrollment_detail} - {self.result_status}"
